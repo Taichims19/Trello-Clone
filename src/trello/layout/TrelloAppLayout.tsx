@@ -12,23 +12,22 @@ export const TrelloAppLayout = () => {
         container
         sx={{
           // backgroundColor: "rgba(248, 248, 255,1)",
-          backgroundColor: "red",
+          background: "rgb(143, 63, 101)",
           width: "100%",
-          height: "100vh",
         }}
       >
         <Grid
           item
           xs={12}
-          className="animate__animated animate__fadeIn animate__faster"
+          // className="animate__animated animate__fadeIn animate__faster"
         >
           <Header />
         </Grid>
-        <Grid item xs={12} sx={{ display: "flex" }}>
-          <Grid item xs={2}>
+        <Grid item lg={12} md={12} sx={{ display: "flex" }}>
+          <Grid item lg={2} md={10} xs={2}>
             <Aside />
           </Grid>
-          <Grid item xs={10}>
+          <Grid item lg={10} md={10} xs={10}>
             <Dashboard />
           </Grid>
         </Grid>

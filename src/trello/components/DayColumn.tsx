@@ -46,12 +46,12 @@ const DayColumn: React.FC<{ day: string }> = ({ day }) => {
       sx={{
         width: "14%",
         minHeight: "20%",
-        maxHeight: "60%",
+        maxHeight: "80%",
         padding: 2,
         color: "white",
         // backgroundColor: "linear-gradient(to right, #4e4e4e, #222222)",
-        backgroundColor: "rgb(34, 29, 36)",
-        borderRadius: 1,
+        backgroundColor: "rgb(16, 18, 4)",
+        borderRadius: 3,
       }}
     >
       <Typography variant="h5" align="center" gutterBottom>

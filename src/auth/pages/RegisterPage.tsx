@@ -83,7 +83,7 @@ export const RegisterPage = () => {
           justifyContent: "center",
           minHeight: "90vh",
           backgroundColor: "#f5f5f5",
-          padding: "20px",
+          padding: "2px",
           background: "rgb(50, 130, 181)",
           borderRadius: 3,
         }}
@@ -92,7 +92,7 @@ export const RegisterPage = () => {
           sx={{
             width: "100%",
             maxWidth: "400px",
-            minHeight: "80vh",
+            minHeight: "87vh",
             padding: "20px",
             backgroundColor: "white",
             boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
@@ -100,7 +100,7 @@ export const RegisterPage = () => {
           }}
         >
           <Typography variant="h4" component="h1" gutterBottom align="center">
-            Registro
+            Registrate en Trello
           </Typography>
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
@@ -213,7 +213,7 @@ export const RegisterPage = () => {
                   variant="contained"
                   fullWidth
                   sx={{
-                    background: "rgba(122, 49, 240, 0.8)",
+                    background: "rgba(12, 102, 228, 1)",
                     height: "38px",
                     "&:hover": {
                       background: "rgba(122, 49, 240, 0.6)",
