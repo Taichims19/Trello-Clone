@@ -1,27 +1,30 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
 
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { v4 as uuidv4 } from "uuid";
+import { useSelector } from "react-redux";
+
 import { Grid, Box } from "@mui/material";
 
 import DayColumn from "./DayColumn";
 import { BoxSesionTwo } from "./BoxSesionTwo";
 import { HeaderDashboard } from "./HeaderDashboard";
+import { RootState } from "../../store/store";
 
 const daysOfWeek = [
   "Lunes",
   "Martes",
-  "Miercoles",
+  "Miércoles", // Con acento
   "Jueves",
   "Viernes",
-  "Sabado",
+  "Sábado", // Con acento
   "Domingo",
 ];
 
 const Dashboard: React.FC = () => {
-  const tasksByDay = useSelector((state: any) => state.trello.tasksByDay);
+  // Obtener tasksByDay desde el estado global de Redux
+  const tasksByDay = useSelector((state: RootState) => state.trello.tasksByDay);
+
   const [open, setOpen] = useState(false);
 
   const handleOpen = () => setOpen(true);
@@ -36,7 +39,7 @@ const Dashboard: React.FC = () => {
 
   return (
     <Grid container sx={{ height: "100vh" }}>
-      <Box sx={{ height: "100%" }}>
+      <Box sx={{ height: "100vh", overflow: "auto" }}>
         <HeaderDashboard getInitials={getInitials} handleOpen={handleOpen} />
 
         <BoxSesionTwo open={open} handleClose={handleClose} />
@@ -45,15 +48,18 @@ const Dashboard: React.FC = () => {
           <Grid container sx={{ height: "80%" }}>
             <Box
               sx={{
-                height: "100%",
+                height: "90vh",
                 display: "flex",
+                // flexWrap: "wrap",
+
                 justifyContent: "space-between",
                 padding: 4,
                 background: "rgb(143, 63, 101)",
+                overflow: "scroll",
               }}
             >
               {daysOfWeek.map((day) => (
-                <DayColumn key={uuidv4()} day={day} />
+                <DayColumn key={day} day={day} tasks={tasksByDay[day]} />
               ))}
             </Box>
           </Grid>

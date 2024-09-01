@@ -26,6 +26,7 @@ const Aside = () => {
           flexDirection: "column",
           position: "relative",
           top: "0%",
+          overflow: "auto",
           backgroundColor: "rgb(34, 29, 36)",
         }}
       >

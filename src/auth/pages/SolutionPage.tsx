@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../store/store";
 import { registerSuccess, setError } from "../../store/auth/authSlice";
 import { saveUser } from "../../hooks/userService";
+
 import trelloLogo from "../../assets/img/trello-logo-1.2.jpg"; // Ajusta la ruta a tu imagen
 
 const initialForm = {
@@ -24,22 +25,22 @@ const initialForm = {
   password: "",
 };
 
-const formValidations = {
-  email: [
-    (value: string) => value.includes("@"),
-    "El correo debe de tener una @",
-  ] as [(value: string) => boolean, string],
-  password: [
-    (value: string) => value.length >= 6,
-    "El password debe de tener más de 6 letras",
-  ] as [(value: string) => boolean, string],
-  displayName: [
-    (value: string) => value.length >= 1,
-    "El nombre es obligatorio",
-  ] as [(value: string) => boolean, string],
-};
+// const formValidations = {
+//   email: [
+//     (value: string) => value.includes("@"),
+//     "El correo debe de tener una @",
+//   ] as [(value: string) => boolean, string],
+//   password: [
+//     (value: string) => value.length >= 6,
+//     "El password debe de tener más de 6 letras",
+//   ] as [(value: string) => boolean, string],
+//   displayName: [
+//     (value: string) => value.length >= 1,
+//     "El nombre es obligatorio",
+//   ] as [(value: string) => boolean, string],
+// };
 
-export const RegisterPage = () => {
+export const SolutionPage = () => {
   const [formSubmitted, setFormSubmitted] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -52,12 +53,11 @@ export const RegisterPage = () => {
     password,
     onInputChange,
     isFormValid,
-    displayNameValid,
-    emailValid,
-    passwordValid,
-  } = useForm(initialForm, formValidations);
 
-  const handleSubmit = async (event: React.FormEvent) => {
+    emailValid,
+  } = useForm(initialForm);
+
+  const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
     setFormSubmitted(true);
 
@@ -66,18 +66,12 @@ export const RegisterPage = () => {
       return;
     }
 
-    try {
-      // Guardar usuario y redirigir
-      const newUser = { email, password, displayName };
-      await saveUser(newUser); // Asegúrate de que esta función maneje correctamente el guardado y devuelva una promesa
+    // Guardar usuario y redirigir
+    const newUser = { email, password, displayName };
+    saveUser(newUser); // Guardar en localStorage
 
-      dispatch(registerSuccess({ email, displayName, password })); // Actualizar el estado de autenticación
-      navigate("/"); // Redirigir a la página principal
-    } catch (error) {
-      dispatch(
-        setError("No se pudo registrar al usuario. Inténtalo de nuevo.")
-      );
-    }
+    dispatch(registerSuccess({ email, displayName, password })); // Actualizar el estado de autenticación
+    navigate("/"); // Redirigir a la página principal
   };
 
   return (
@@ -88,9 +82,9 @@ export const RegisterPage = () => {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          minHeight: "87vh",
+          minHeight: "90vh",
           backgroundColor: "#f5f5f5",
-          padding: "0px",
+          padding: "2px",
           background: "rgb(50, 130, 181)",
           borderRadius: 3,
         }}
@@ -98,7 +92,7 @@ export const RegisterPage = () => {
         <Box
           sx={{
             width: "100%",
-            maxWidth: "440px",
+            maxWidth: "400px",
             minHeight: "87vh",
             padding: "20px",
             backgroundColor: "white",
@@ -118,43 +112,19 @@ export const RegisterPage = () => {
               borderRadius: "10px",
             }}
           />
-          <Typography variant="h4" component="h1" gutterBottom align="center">
-            Registrate en Trello
+          <Typography
+            sx={{
+              position: "relative",
+              left: "18%",
+              fontSize: "18px",
+              fontWeight: 700,
+              bottom: "2%",
+            }}
+          >
+            ¿No puedes iniciar sesión?
           </Typography>
           <form onSubmit={handleSubmit}>
             <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <TextField
-                  label="Nombre completo"
-                  type="text"
-                  placeholder="Tu Nombre"
-                  fullWidth
-                  name="displayName"
-                  value={displayName}
-                  onChange={onInputChange}
-                  error={!!displayNameValid && formSubmitted}
-                  helperText={displayNameValid}
-                  sx={{
-                    "& .MuiInputLabel-root": {
-                      color: "rgba(122, 49, 240, 0.8)", // Color del label cuando está en estado normal
-                    },
-                    "& .MuiInputLabel-shrink": {
-                      color: "rgba(122, 49, 240, 0.8) !important", // Color del label cuando está arriba
-                    },
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "rgba(122, 49, 240, 0.5)", // Color del borde
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "rgba(122, 49, 240, 0.7)", // Color del borde cuando pasa el mouse
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "rgba(122, 49, 240, 0.9)", // Color del borde cuando está enfocado
-                      },
-                    },
-                  }}
-                />
-              </Grid>
               <Grid item xs={12}>
                 <TextField
                   label="Correo"
@@ -187,44 +157,6 @@ export const RegisterPage = () => {
                   }}
                 />
               </Grid>
-              <Grid item xs={12}>
-                <TextField
-                  label="Contraseña"
-                  type="password"
-                  placeholder="contraseña"
-                  fullWidth
-                  name="password"
-                  value={password}
-                  onChange={onInputChange}
-                  error={!!passwordValid && formSubmitted}
-                  helperText={passwordValid}
-                  sx={{
-                    "& .MuiInputLabel-root": {
-                      color: "rgba(122, 49, 240, 0.8)", // Color del label cuando está en estado normal
-                    },
-                    "& .MuiInputLabel-shrink": {
-                      color: "rgba(122, 49, 240, 0.8) !important", // Color del label cuando está arriba
-                    },
-                    "& .MuiOutlinedInput-root": {
-                      "& fieldset": {
-                        borderColor: "rgba(122, 49, 240, 0.5)", // Color del borde
-                      },
-                      "&:hover fieldset": {
-                        borderColor: "rgba(122, 49, 240, 0.7)", // Color del borde cuando pasa el mouse
-                      },
-                      "&.Mui-focused fieldset": {
-                        borderColor: "rgba(122, 49, 240, 0.9)", // Color del borde cuando está enfocado
-                      },
-                    },
-                  }}
-                />
-              </Grid>
-
-              <Grid item xs={12} sx={{ marginTop: 2 }}>
-                <Alert severity="error">
-                  Por favor complete el formulario correctamente
-                </Alert>
-              </Grid>
 
               <Grid item xs={12}>
                 <Button
@@ -239,7 +171,7 @@ export const RegisterPage = () => {
                     },
                   }}
                 >
-                  Crear Cuenta
+                  Enviar enlace de recuperacion
                 </Button>
               </Grid>
               <Grid
@@ -250,7 +182,7 @@ export const RegisterPage = () => {
                 <Typography>
                   ¿Ya tienes una cuenta?{" "}
                   <Link component={RouterLink} color="inherit" to="/auth/login">
-                    Iniciar sesión
+                    Volver a Inicio de sesión
                   </Link>
                 </Typography>
               </Grid>

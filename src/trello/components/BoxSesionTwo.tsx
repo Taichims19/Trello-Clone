@@ -43,14 +43,14 @@ export const BoxSesionTwo = ({ open, handleClose }) => {
       <Box
         sx={{
           position: "relative",
-          top: "40%",
-          left: "85%",
+          top: "32%",
+          left: "86.3%",
           transform: "translate(-50%, -50%)",
           width: "20%",
-          height: "30%",
+          height: "35vh",
           borderRadius: 4,
           background: "rgb(40, 46, 51)",
-
+          overflow: "auto",
           boxShadow: 24,
           display: "flex",
           flexDirection: "column",
@@ -88,7 +88,7 @@ export const BoxSesionTwo = ({ open, handleClose }) => {
                   minWidth: "95px",
                   height: "95px",
                   marginRight: "10%",
-                  paddingTop: "2px",
+                  paddingTop: "5px",
                   letterSpacing: "-5px",
                   lineHeight: 0,
                   background: "rgba(0, 82, 204, 1)",
@@ -136,7 +136,7 @@ export const BoxSesionTwo = ({ open, handleClose }) => {
               display: "flex",
               flexDirection: "column",
               position: "relative",
-              top: "22%",
+              top: "6vh",
             }}
           >
             <ListItemButton

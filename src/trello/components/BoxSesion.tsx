@@ -66,7 +66,7 @@ export const BoxSesion = ({ open, handleClose }) => {
           left: "87%",
           transform: "translate(-50%, -50%)",
           width: "21%",
-          height: "88%",
+          height: "88vh",
           borderRadius: 3,
           background: "rgb(40, 46, 51)",
           boxShadow: 24,
@@ -74,7 +74,7 @@ export const BoxSesion = ({ open, handleClose }) => {
           display: "flex",
           flexDirection: "column",
           gap: 2,
-
+          overflow: "auto",
           margin: "20px",
         }}
       >

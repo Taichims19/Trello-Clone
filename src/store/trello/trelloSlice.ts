@@ -1,6 +1,7 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid"; //
 import { Task } from "../../helpers/interfacesTrello";
+import { AUTH_STORAGE_KEY } from "../../helpers/variableTrello";
 
 interface TrelloState {
   tasksByDay: Record<string, Task[]>; // Map string (día) a Task[]
@@ -10,13 +11,13 @@ interface TrelloState {
 
 const initialState: TrelloState = {
   tasksByDay: {
-    monday: [],
-    tuesday: [],
-    wednesday: [],
-    thursday: [],
-    friday: [],
-    saturday: [],
-    sunday: [],
+    Lunes: [],
+    Martes: [],
+    Miércoles: [], // Con acento
+    Jueves: [],
+    Viernes: [],
+    Sábado: [], // Con acento
+    Domingo: [],
   },
   loading: false,
   error: null,
@@ -47,9 +48,45 @@ interface MoveTaskPayload {
   hoverIndex: number;
 }
 
+const getUserId = (): string => {
+  // Intenta obtener el objeto 'auth' desde localStorage
+  const authString = localStorage.getItem(AUTH_STORAGE_KEY);
+
+  if (authString) {
+    try {
+      // Intenta parsear el objeto 'auth'
+      const auth = JSON.parse(authString);
+
+      // Verifica si el objeto 'auth' tiene un campo 'id'
+      if (auth && typeof auth.id === "string") {
+        return auth.id;
+      }
+    } catch (error) {
+      // Maneja el caso en el que el parseo falle
+      console.error("Error parsing auth from localStorage:", error);
+    }
+  }
+
+  // Devuelve un valor por defecto si no se puede obtener el 'id'
+  return "";
+};
+
+// Función para cargar el estado desde el localStorage
+const loadTasksFromLocalStorage = (): Record<string, Task[]> => {
+  const userId = getUserId();
+  if (userId) {
+    const storedTasks = localStorage.getItem(`tasks_Trello_${userId}`);
+    return storedTasks ? JSON.parse(storedTasks) : initialState.tasksByDay;
+  }
+  return initialState.tasksByDay; // Retorna el estado inicial si no hay userId
+};
+
 export const trelloSlice = createSlice({
   name: "trello",
-  initialState,
+  initialState: {
+    ...initialState,
+    tasksByDay: loadTasksFromLocalStorage(),
+  },
   reducers: {
     addTask: (state, action: PayloadAction<AddTaskPayload>) => {
       const { day, title, description } = action.payload;
@@ -60,12 +97,17 @@ export const trelloSlice = createSlice({
         createdAt: Date.now(),
         day,
       };
-      // Verifica si el día existe en tasksByDay antes de hacer push
       if (state.tasksByDay[day]) {
         state.tasksByDay[day].push(newTask);
       } else {
-        // Si no existe, puedes inicializarlo con una nueva array de tareas
         state.tasksByDay[day] = [newTask];
+      }
+      const userId = getUserId();
+      if (userId) {
+        localStorage.setItem(
+          `tasks_Trello_${userId}`,
+          JSON.stringify(state.tasksByDay)
+        );
       }
     },
     updateTask: (state, action: PayloadAction<UpdateTaskPayload>) => {
@@ -75,12 +117,26 @@ export const trelloSlice = createSlice({
         if (title) task.title = title;
         if (description) task.description = description;
       }
+      const userId = getUserId();
+      if (userId) {
+        localStorage.setItem(
+          `tasks_Trello_${userId}`,
+          JSON.stringify(state.tasksByDay)
+        );
+      }
     },
     removeTask: (state, action: PayloadAction<RemoveTaskPayload>) => {
       const { day, taskId } = action.payload;
       state.tasksByDay[day] = state.tasksByDay[day].filter(
         (task) => task.id !== taskId
       );
+      const userId = getUserId();
+      if (userId) {
+        localStorage.setItem(
+          `tasks_Trello_${userId}`,
+          JSON.stringify(state.tasksByDay)
+        );
+      }
     },
     moveTask: (state, action: PayloadAction<MoveTaskPayload>) => {
       const { sourceDay, destinationDay, taskId, hoverIndex } = action.payload;
@@ -92,6 +148,14 @@ export const trelloSlice = createSlice({
 
       const [removedTask] = sourceTasks.splice(taskIndex, 1);
       destinationTasks.splice(hoverIndex, 0, removedTask);
+
+      const userId = getUserId();
+      if (userId) {
+        localStorage.setItem(
+          `tasks_Trello_${userId}`,
+          JSON.stringify(state.tasksByDay)
+        );
+      }
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;

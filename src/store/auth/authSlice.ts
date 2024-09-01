@@ -1,8 +1,12 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { v4 as uuidv4 } from "uuid";
 import { findUserByEmail, saveUser } from "../../hooks/userService";
+import { User } from "../../helpers/interfacesTrello";
+import { AUTH_STORAGE_KEY } from "../../helpers/variableTrello";
 
 interface AuthState {
   isAuthenticated: boolean;
+  id: string | null; // Agregar el id del usuario autenticado
   email: string | null;
   displayName: string | null;
   errorMessage: string | null;
@@ -11,6 +15,7 @@ interface AuthState {
 
 const initialState: AuthState = {
   isAuthenticated: false,
+  id: null, // Iniciar como null
   email: null,
   displayName: null,
   errorMessage: null,
@@ -28,22 +33,25 @@ export const authSlice = createSlice({
       const user = findUserByEmail(action.payload.email);
       if (user) {
         state.isAuthenticated = true;
+        state.id = user.id; // Guardar el id del usuario
         state.email = user.email;
         state.displayName = user.displayName;
         state.errorMessage = null;
         state.status = "authenticated";
-        localStorage.setItem("auth", JSON.stringify(state)); // Guardar en localStorage
+        localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state)); // Guardar en `localStorage` con la clave específica
       } else {
         state.errorMessage = "User not found.";
       }
     },
     logoutSuccess: (state) => {
       state.isAuthenticated = false;
+      state.id = null; // Reiniciar id
       state.email = null;
       state.displayName = null;
       state.errorMessage = null;
       state.status = "not_authenticated";
-      localStorage.removeItem("auth"); // Eliminar de localStorage
+      localStorage.removeItem(AUTH_STORAGE_KEY); // Eliminar de `localStorage`
+      authSlice.caseReducers.clearUserData(state); // Llamar a `clearUserData`
     },
     registerSuccess: (
       state,
@@ -54,33 +62,66 @@ export const authSlice = createSlice({
       }>
     ) => {
       const { email, displayName, password } = action.payload;
+
+      // Crear un nuevo usuario con un id único
+      const newUser: User = {
+        id: uuidv4(),
+        email,
+        displayName,
+        password,
+      };
+
       state.isAuthenticated = true;
+      state.id = newUser.id; // Guardar el id del usuario registrado
       state.email = email;
       state.displayName = displayName;
       state.errorMessage = null;
       state.status = "authenticated";
 
       // Guardar en TrelloClone_users usando UserService
-      saveUser({ email, displayName, password });
+      saveUser(newUser);
 
       // Guardar en localStorage
-      localStorage.setItem("auth", JSON.stringify(state));
+      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(state)); // Guardar en `localStorage`
     },
     loadSession: (state) => {
-      const storedState = localStorage.getItem("auth");
+      const storedState = localStorage.getItem(AUTH_STORAGE_KEY);
       if (storedState) {
-        const parsedState = JSON.parse(storedState);
-        state.isAuthenticated = parsedState.isAuthenticated;
-        state.email = parsedState.email;
-        state.displayName = parsedState.displayName;
-        state.errorMessage = parsedState.errorMessage;
-        state.status = parsedState.status;
-      } else {
-        state.status = "not_authenticated";
+        const sessionData = JSON.parse(storedState) as AuthState;
+        if (sessionData.isAuthenticated) {
+          return {
+            ...state,
+            isAuthenticated: true,
+            id: sessionData.id,
+            email: sessionData.email,
+            displayName: sessionData.displayName,
+            status: "authenticated",
+          };
+        }
       }
+      // Si no hay estado válido en localStorage, retorna el estado de no autenticado
+      return {
+        ...state,
+        isAuthenticated: false,
+        id: null,
+        email: null,
+        displayName: null,
+        status: "not_authenticated",
+      };
     },
+
     setError: (state, action: PayloadAction<string>) => {
       state.errorMessage = action.payload;
+    },
+    clearUserData: (state) => {
+      // Aquí podrías limpiar otros slices relacionados
+      // Reiniciamos el estado de la autenticación
+      state.isAuthenticated = false;
+      state.id = null;
+      state.email = null;
+      state.displayName = null;
+      state.errorMessage = null;
+      state.status = "not_authenticated";
     },
   },
 });
@@ -91,5 +132,6 @@ export const {
   registerSuccess,
   loadSession,
   setError,
+  clearUserData,
 } = authSlice.actions;
 export default authSlice.reducer;

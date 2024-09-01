@@ -7,6 +7,7 @@ import {
   Alert,
   Box,
   Typography,
+  Divider,
 } from "@mui/material";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -91,7 +92,7 @@ export const LoginPage = () => {
           flexDirection: "column",
           alignItems: "center",
           justifyContent: "center",
-          height: "90vh",
+          height: "92vh",
 
           borderRadius: 3,
         }}
@@ -110,7 +111,7 @@ export const LoginPage = () => {
             src={trelloLogo} // Reemplaza con la URL de tu imagen
             alt="Imagen de bienvenida"
             width="140" // Ajusta el ancho deseado
-            height="70" // Ajusta la altura deseada
+            height="90" // Ajusta la altura deseada
             style={{
               position: "relative",
               left: "28%",
@@ -118,8 +119,23 @@ export const LoginPage = () => {
               borderRadius: "10px",
             }}
           />
+          <Typography
+            sx={{
+              position: "relative",
+              left: "18%",
+              fontSize: "18px",
+              fontWeight: 700,
+              bottom: "2%",
+            }}
+          >
+            Inicia sesión para continuar
+          </Typography>
           <form onSubmit={handleSubmit}>
-            <Grid container spacing={2}>
+            <Grid
+              // sx={{ background: "blue", height: "73vh" }}
+              container
+              spacing={2}
+            >
               <Grid item xs={12}>
                 <TextField
                   label="Introduce tu correo electronico"
@@ -188,8 +204,9 @@ export const LoginPage = () => {
                   fullWidth
                   sx={{
                     position: "relative",
-                    left: "3%",
-                    width: "91%",
+                    bottom: "50%",
+
+                    width: "100%",
                     height: "40px",
                     background: "rgba(12, 102, 228, 1)",
                     "&:hover": {
@@ -244,15 +261,35 @@ export const LoginPage = () => {
 
               <Grid
                 item
-                xs={12}
+                xs={7}
                 sx={{
                   textAlign: "center",
                   position: "relative",
+
+                  fontSize: "16px",
+                  maxWidth: "100%",
                 }}
               >
                 <Link
                   component={RouterLink}
-                  color="inherit"
+                  color="rgb(12, 102, 228)"
+                  to="/auth/solution"
+                >
+                  ¿No puedes iniciar sesión?
+                </Link>
+              </Grid>
+              <Grid
+                item
+                xs={5}
+                sx={{
+                  textAlign: "start",
+                  position: "relative",
+                  maxWidth: "100%",
+                }}
+              >
+                <Link
+                  component={RouterLink}
+                  color="rgb(12, 102, 228)"
                   to="/auth/register"
                 >
                   Crear una cuenta
@@ -260,6 +297,16 @@ export const LoginPage = () => {
               </Grid>
             </Grid>
           </form>
+          <Divider
+            sx={{
+              background: "rgba(0, 0, 0, 0.2)",
+              position: "relative",
+              top: "2%",
+
+              width: "100%",
+              height: "1px",
+            }}
+          />
         </Box>
       </Box>
     </AuthLayout>
