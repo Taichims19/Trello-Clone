@@ -1,8 +1,8 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 
 import { Grid, Box } from "@mui/material";
 
@@ -10,6 +10,10 @@ import DayColumn from "./DayColumn";
 import { BoxSesionTwo } from "./BoxSesionTwo";
 import { HeaderDashboard } from "./HeaderDashboard";
 import { RootState } from "../../store/store";
+import {
+  loadTasksFromLocalStorage,
+  setTasks,
+} from "../../store/trello/trelloSlice";
 
 const daysOfWeek = [
   "Lunes",
@@ -24,8 +28,19 @@ const daysOfWeek = [
 const Dashboard: React.FC = () => {
   // Obtener tasksByDay desde el estado global de Redux
   const tasksByDay = useSelector((state: RootState) => state.trello.tasksByDay);
+  const { isAuthenticated, id: userId } = useSelector(
+    (state: RootState) => state.auth
+  ); // Aquí obtienes tanto `isAuthenticated` como `userId`
 
+  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
+
+  useEffect(() => {
+    if (isAuthenticated && userId) {
+      const tasks = loadTasksFromLocalStorage(userId); // Asumiendo que puedes cargar tareas con un `userId`
+      dispatch(setTasks(tasks)); // Actualiza el estado en Redux con las tareas del usuario
+    }
+  }, [isAuthenticated, userId, dispatch]);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);

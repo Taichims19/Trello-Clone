@@ -72,20 +72,23 @@ const getUserId = (): string => {
 };
 
 // Función para cargar el estado desde el localStorage
-const loadTasksFromLocalStorage = (): Record<string, Task[]> => {
-  const userId = getUserId();
+export const loadTasksFromLocalStorage = (
+  userId: string
+): Record<string, Task[]> => {
   if (userId) {
     const storedTasks = localStorage.getItem(`tasks_Trello_${userId}`);
-    return storedTasks ? JSON.parse(storedTasks) : initialState.tasksByDay;
+    if (storedTasks) {
+      return JSON.parse(storedTasks);
+    }
   }
-  return initialState.tasksByDay; // Retorna el estado inicial si no hay userId
+  return initialState.tasksByDay;
 };
 
 export const trelloSlice = createSlice({
   name: "trello",
   initialState: {
     ...initialState,
-    tasksByDay: loadTasksFromLocalStorage(),
+    tasksByDay: initialState.tasksByDay, // Evitar cargar tareas específicas en la inicialización
   },
   reducers: {
     addTask: (state, action: PayloadAction<AddTaskPayload>) => {
@@ -163,6 +166,9 @@ export const trelloSlice = createSlice({
     setError: (state, action: PayloadAction<string | null>) => {
       state.error = action.payload;
     },
+    setTasks: (state, action: PayloadAction<Record<string, Task[]>>) => {
+      state.tasksByDay = action.payload;
+    },
   },
 });
 
@@ -173,5 +179,6 @@ export const {
   moveTask,
   setLoading,
   setError,
+  setTasks,
 } = trelloSlice.actions;
 export default trelloSlice.reducer;
