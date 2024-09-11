@@ -7,6 +7,7 @@ interface TrelloState {
   tasksByDay: Record<string, Task[]>; // Map string (día) a Task[]
   loading: boolean;
   error: string | null;
+  daysOrder: string[]; // Nuevo estado para el orden de los días
 }
 
 const initialState: TrelloState = {
@@ -21,6 +22,15 @@ const initialState: TrelloState = {
   },
   loading: false,
   error: null,
+  daysOrder: [
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+    "Domingo",
+  ], // Orden inicial de los días
 };
 
 interface AddTaskPayload {
@@ -42,10 +52,15 @@ interface RemoveTaskPayload {
 }
 
 interface MoveTaskPayload {
+  taskId: string;
   sourceDay: string;
   destinationDay: string;
-  taskId: string;
-  hoverIndex: number;
+  destinationIndex: number;
+}
+
+interface MoveDayPayload {
+  sourceDayIndex: number;
+  destinationDayIndex: number;
 }
 
 const getUserId = (): string => {
@@ -84,11 +99,33 @@ export const loadTasksFromLocalStorage = (
   return initialState.tasksByDay;
 };
 
+// Función para cargar el orden de los días desde localStorage
+export const loadDaysOrderFromLocalStorage = (userId: string): string[] => {
+  if (userId) {
+    const storedDaysOrder = localStorage.getItem(`daysOrder_Trello_${userId}`);
+    if (storedDaysOrder) {
+      return JSON.parse(storedDaysOrder);
+    }
+  }
+  return initialState.daysOrder;
+};
+
+// Función para guardar el orden de los días en el localStorage
+const saveDaysOrderToLocalStorage = (userId: string, daysOrder: string[]) => {
+  if (userId) {
+    localStorage.setItem(
+      `daysOrder_Trello_${userId}`,
+      JSON.stringify(daysOrder)
+    );
+  }
+};
+
 export const trelloSlice = createSlice({
   name: "trello",
   initialState: {
     ...initialState,
     tasksByDay: initialState.tasksByDay, // Evitar cargar tareas específicas en la inicialización
+    daysOrder: initialState.daysOrder,
   },
   reducers: {
     addTask: (state, action: PayloadAction<AddTaskPayload>) => {
@@ -142,15 +179,21 @@ export const trelloSlice = createSlice({
       }
     },
     moveTask: (state, action: PayloadAction<MoveTaskPayload>) => {
-      const { sourceDay, destinationDay, taskId, hoverIndex } = action.payload;
-      const sourceTasks = state.tasksByDay[sourceDay];
-      const destinationTasks = state.tasksByDay[destinationDay];
+      const { taskId, sourceDay, destinationDay, destinationIndex } =
+        action.payload;
+      const task = state.tasksByDay[sourceDay].find(
+        (task) => task.id === taskId
+      );
 
-      const taskIndex = sourceTasks.findIndex((task) => task.id === taskId);
-      if (taskIndex === -1) return;
+      if (!task) return;
 
-      const [removedTask] = sourceTasks.splice(taskIndex, 1);
-      destinationTasks.splice(hoverIndex, 0, removedTask);
+      // Remueve la tarea del día original
+      state.tasksByDay[sourceDay] = state.tasksByDay[sourceDay].filter(
+        (task) => task.id !== taskId
+      );
+
+      // Inserta la tarea en la nueva posición del nuevo día
+      state.tasksByDay[destinationDay].splice(destinationIndex, 0, task);
 
       const userId = getUserId();
       if (userId) {
@@ -159,6 +202,16 @@ export const trelloSlice = createSlice({
           JSON.stringify(state.tasksByDay)
         );
       }
+    },
+    moveDay: (state, action: PayloadAction<MoveDayPayload>) => {
+      const { sourceDayIndex, destinationDayIndex } = action.payload;
+      const days = [...state.daysOrder];
+      const [movedDay] = days.splice(sourceDayIndex, 1);
+      days.splice(destinationDayIndex, 0, movedDay);
+      state.daysOrder = days;
+
+      const userId = getUserId();
+      saveDaysOrderToLocalStorage(userId, days);
     },
     setLoading: (state, action: PayloadAction<boolean>) => {
       state.loading = action.payload;
@@ -169,6 +222,9 @@ export const trelloSlice = createSlice({
     setTasks: (state, action: PayloadAction<Record<string, Task[]>>) => {
       state.tasksByDay = action.payload;
     },
+    setDaysOrder: (state, action: PayloadAction<string[]>) => {
+      state.daysOrder = action.payload;
+    },
   },
 });
 
@@ -177,8 +233,10 @@ export const {
   updateTask,
   removeTask,
   moveTask,
+  moveDay,
   setLoading,
   setError,
   setTasks,
+  setDaysOrder,
 } = trelloSlice.actions;
 export default trelloSlice.reducer;

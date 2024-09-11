@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDrop } from "react-dnd";
+import { Draggable, Droppable } from "@hello-pangea/dnd";
 import {
   Box,
   Typography,
@@ -30,20 +30,6 @@ const DayColumn: React.FC<DayColumnProps> = ({ day, tasks }) => {
   // const tasks = useSelector(
   //   (state: RootState) => state.trello.tasksByDay[day.toLowerCase()] || []
   // );
-
-  const [, dropRef] = useDrop({
-    accept: "TASK",
-    drop: (item: { id: string; fromDay: string }) => {
-      dispatch(
-        moveTask({
-          sourceDay: item.fromDay,
-          destinationDay: day,
-          taskId: item.id,
-          hoverIndex: 0,
-        })
-      );
-    },
-  });
 
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [isAddingTask, setIsAddingTask] = useState(false);
@@ -96,7 +82,6 @@ const DayColumn: React.FC<DayColumnProps> = ({ day, tasks }) => {
   return (
     <Grid sx={{ height: "75vh" }} item xs={12} sm={6} md={4}>
       <Box
-        ref={dropRef}
         sx={{
           width: "300px",
           height: "auto",
@@ -143,93 +128,112 @@ const DayColumn: React.FC<DayColumnProps> = ({ day, tasks }) => {
             </Menu>
           </Box>
         </Box>
-        <Box
-          sx={{
-            flexGrow: 1,
-            overflowY: "auto",
-            padding: "0 16px",
-            "&::-webkit-scrollbar": {
-              width: "8px",
-            },
-            "&::-webkit-scrollbar-thumb": {
-              backgroundColor: "#888",
-              borderRadius: "4px",
-            },
-            "&::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: "#555",
-            },
-          }}
-        >
-          {tasks.map((task) => (
-            <Box key={task.id}>
-              {editingTaskId === task.id ? (
-                <Box>
-                  <TextField
-                    value={editingTaskTitle}
-                    onChange={(e) => setEditingTaskTitle(e.target.value)}
-                    fullWidth
-                    variant="outlined"
-                    multiline
-                    sx={{
-                      input: { color: "white" },
-                      label: { color: "white" },
-                      borderRadius: 3,
-                      marginBottom: 1,
-                      "& .MuiOutlinedInput-root": {
-                        "& fieldset": {
-                          borderColor: "#616161",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "#757575",
-                        },
-                        backgroundColor: "rgb(34, 39, 43)",
-                      },
-                      maxHeight: "200px",
-                      overflow: "auto",
-                    }}
-                  />
-                  <Box
-                    display="flex"
-                    justifyContent="space-between"
-                    alignItems="center"
-                  >
-                    <Button
-                      variant="contained"
-                      onClick={handleSaveEdit}
-                      startIcon={<AddIcon />}
-                      sx={{
-                        backgroundColor: "#3f51b5",
-                        color: "white",
-                        "&:hover": {
-                          backgroundColor: "rgb(133, 184, 255)",
-                        },
-                        "&:disabled": {
-                          backgroundColor: "rgb(133, 184, 255)",
-                          opacity: 1,
-                        },
-                      }}
-                      disabled={!editingTaskTitle}
+        <Droppable droppableId={day}>
+          {(provided) => (
+            <Box
+              ref={provided.innerRef}
+              {...provided.droppableProps}
+              sx={{
+                flexGrow: 1,
+                overflowY: "auto",
+                padding: "0 16px",
+                "&::-webkit-scrollbar": {
+                  width: "8px",
+                },
+                "&::-webkit-scrollbar-thumb": {
+                  backgroundColor: "#888",
+                  borderRadius: "4px",
+                },
+                "&::-webkit-scrollbar-thumb:hover": {
+                  backgroundColor: "#555",
+                },
+                background: "rgba(16, 18, 4, 1)",
+                minHeight: "5px",
+              }}
+            >
+              {tasks.map((task, index) => (
+                <Draggable key={task.id} draggableId={task.id} index={index}>
+                  {(provided) => (
+                    <Box
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
                     >
-                      Guardar Cambios
-                    </Button>
-                    <IconButton
-                      onClick={handleCancelEdit}
-                      sx={{ color: "white" }}
-                    >
-                      <CloseIcon />
-                    </IconButton>
-                  </Box>
-                </Box>
-              ) : (
-                <TaskCard
-                  id={task.id}
-                  title={task.title}
-                  onEdit={() => handleEditTask(task.id, task.title)}
-                />
-              )}
+                      {editingTaskId === task.id ? (
+                        <Box>
+                          <TextField
+                            value={editingTaskTitle}
+                            onChange={(e) =>
+                              setEditingTaskTitle(e.target.value)
+                            }
+                            fullWidth
+                            variant="outlined"
+                            multiline
+                            sx={{
+                              input: { color: "white" },
+                              label: { color: "white" },
+                              borderRadius: 3,
+                              marginBottom: 1,
+                              "& .MuiOutlinedInput-root": {
+                                "& fieldset": {
+                                  borderColor: "#616161",
+                                },
+                                "&:hover fieldset": {
+                                  borderColor: "#757575",
+                                },
+                                backgroundColor: "rgb(34, 39, 43)",
+                              },
+                              maxHeight: "200px",
+                              overflow: "auto",
+                            }}
+                          />
+                          <Box
+                            display="flex"
+                            justifyContent="space-between"
+                            alignItems="center"
+                          >
+                            <Button
+                              variant="contained"
+                              onClick={handleSaveEdit}
+                              startIcon={<AddIcon />}
+                              sx={{
+                                backgroundColor: "#3f51b5",
+                                color: "white",
+                                "&:hover": {
+                                  backgroundColor: "rgb(133, 184, 255)",
+                                },
+                                "&:disabled": {
+                                  backgroundColor: "rgb(133, 184, 255)",
+                                  opacity: 1,
+                                },
+                              }}
+                              disabled={!editingTaskTitle}
+                            >
+                              Guardar Cambios
+                            </Button>
+                            <IconButton
+                              onClick={handleCancelEdit}
+                              sx={{ color: "white" }}
+                            >
+                              <CloseIcon />
+                            </IconButton>
+                          </Box>
+                        </Box>
+                      ) : (
+                        <TaskCard
+                          id={task.id}
+                          title={task.title}
+                          onEdit={() => handleEditTask(task.id, task.title)}
+                        />
+                      )}
+                    </Box>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
             </Box>
-          ))}
-        </Box>
+          )}
+        </Droppable>
         {!isAddingTask && (
           <Button
             onClick={() => setIsAddingTask(true)}
