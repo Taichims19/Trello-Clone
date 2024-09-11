@@ -1,10 +1,8 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useDrag } from "react-dnd";
-
 import { Card, CardContent, IconButton, Typography } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete"; // Añadimos el icono de eliminar
+import DeleteIcon from "@mui/icons-material/Delete";
 
 import { RootState } from "../../store/store";
 import { removeTask } from "../../store/trello/trelloSlice";
@@ -29,11 +27,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, title, onEdit }) => {
     return null;
   });
 
-  const [, dragRef] = useDrag(() => ({
-    type: "TASK",
-    item: { id, fromDay: task?.day },
-  }));
-
   const handleDelete = () => {
     if (task) {
       dispatch(removeTask({ day: task.day, taskId: id }));
@@ -46,7 +39,6 @@ const TaskCard: React.FC<TaskCardProps> = ({ id, title, onEdit }) => {
 
   return (
     <Card
-      ref={dragRef}
       sx={{
         margin: "10px 0px",
         padding: "0px 0px",
